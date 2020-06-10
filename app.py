@@ -1,17 +1,9 @@
-import os
 import pandas as pd
-
 import plotly.graph_objects as go
-from plotly.subplots import make_subplots
-import plotly.express as px
-
 import dash
 import dash_table
-from dash_table.Format import Format
-import dash_table.FormatTemplate as FormatTemplate
 import dash_core_components as dcc
 import dash_html_components as html
-import dash_bootstrap_components as dbc
 from dash.dependencies import Input, Output
 
 
@@ -21,6 +13,10 @@ app = dash.Dash(__name__, assets_folder='./assets/', external_stylesheets=[BS])
 
 app.title = 'Monthly Expenses'
 
+server = app.server
+
+# prevent app crash when loading since we have plot that only render when user clicks.
+app.config['suppress_callback_exceptions'] = True
 
 # Reading data
 

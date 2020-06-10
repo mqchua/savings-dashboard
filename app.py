@@ -15,9 +15,6 @@ app.title = 'Monthly Expenses'
 
 server = app.server
 
-# prevent app crash when loading since we have plot that only render when user clicks.
-app.config['suppress_callback_exceptions'] = True
-
 # Reading data
 
 xls = pd.ExcelFile("test_output.xlsx",)
@@ -30,7 +27,7 @@ savings = df_expenses.Savings.tolist()
 wedding = df_expenses.Wedding.tolist()
 renovation = df_expenses.Renovation.tolist()
 
-spending_label = df_expenses.columns.tolist()[1:8]
+spending_label = df_expenses.columns.tolist()[2:9]
 
 # PLOT 2
 
@@ -358,10 +355,14 @@ app.layout = html.Div(
                         {'if': {'column_id': 'Insurance'}, 'width': '8%'},
                         {'if': {'column_id': 'Healthcare'}, 'width': '8%'},
                         {'if': {'column_id': 'Lifestyle'}, 'width': '8%'},
-                        {'if': {'column_id': 'Savings'}, 'width': '8%'},
-                        {'if': {'column_id': 'Expenses'}, 'width': '8%'},
-                        {'if': {'column_id': 'Wedding'}, 'width': '8%'},
-                        {'if': {'column_id': 'Renovation'}, 'width': '8%'},
+                        {'if': {'column_id': 'Savings'},
+                            'width': '8%', 'color': '#2ecc77'},
+                        {'if': {'column_id': 'Expenses'},
+                            'width': '8%', 'color': '#f0953f'},
+                        {'if': {'column_id': 'Wedding'},
+                            'width': '8%', 'color': '#2ecc77'},
+                        {'if': {'column_id': 'Renovation'},
+                            'width': '8%', 'color': '#2ecc77'},
                         {'if': {'column_id': 'Comments'}, 'width': '14%'},
                         {'textAlign': 'center'}
                     ],
@@ -429,7 +430,7 @@ def render_combined_bar_plot(input1):
     # filter input
 
     month_index = df_expenses[df_expenses['Month'].str.match(input1)].iloc[0].tolist()[
-        1:]
+        2:]
 
     fig = go.Figure(data=[go.Pie(labels=spending_label,
                                  values=month_index)])
@@ -442,13 +443,13 @@ def render_combined_bar_plot(input1):
         margin=go.layout.Margin(
             l=10,
             r=10,
-            b=10,
-            t=5,
+            b=50,
+            t=50,
             pad=0
         ),
 
         # legend_orientation="",
-        legend=dict(x=-.1, y=1.2),
+        showlegend=False,
         plot_bgcolor='#ffffff',
         paper_bgcolor='#ffffff',
         font=dict(color='#292929', size=10)

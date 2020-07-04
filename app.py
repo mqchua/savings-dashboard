@@ -5,7 +5,8 @@ import dash_table
 import dash_core_components as dcc
 import dash_html_components as html
 from dash.dependencies import Input, Output
-
+from datetime import datetime
+from dateutil.relativedelta import relativedelta
 
 BS = "https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css"
 
@@ -17,17 +18,39 @@ server = app.server
 
 # Reading data
 
-xls = pd.ExcelFile("test_output.xlsx",)
+xls = pd.ExcelFile("Monthly Expenses.xlsx",)
 df_history = pd.read_excel(xls, 'Sheet1', index_col=0)
 df_expenses = pd.read_excel(xls, 'Sheet2', index_col=0)
+df_target = pd.read_excel(xls, 'Sheet3', index_col=0)
 
 
 month = df_expenses.Month.tolist()
+month_list = ['January', 'February', 'March', 'April', 'May', 'June',
+              'July', 'August', 'September', 'October', 'November', 'December']
 savings = df_expenses.Savings.tolist()
 wedding = df_expenses.Wedding.tolist()
 renovation = df_expenses.Renovation.tolist()
 
 spending_label = df_expenses.columns.tolist()[2:9]
+
+# Format current month
+
+month_now = int(datetime.today().strftime('%m'))
+month_index = month_now - 1
+
+df_current_month = df_expenses.loc[df_expenses.index == month_index]
+current_month = df_current_month['Month'].values[0]
+current_expenses = int(df_current_month['Expenses'].values[0])
+current_savings = int(df_current_month['Savings'].values[0])
+wedding_savings = int(df_current_month['Wedding'].values[0])
+renovation_savings = int(df_current_month['Renovation'].values[0])
+
+wedding_target = int(df_target.loc['Target'][0])
+wedding_deficit = int(wedding_target - wedding_savings)
+renovation_target = int(df_target.loc['Target'][1])
+wedding_left = int(df_target.loc['Months Left'][0])
+renovation_deficit = int(renovation_target - renovation_savings)
+renovation_left = int(df_target.loc['Months Left'][1])
 
 # PLOT 2
 
@@ -68,7 +91,7 @@ fig_total.update_layout(
     xaxis_tickformat='%b %d',
     hovermode='x unified',
     legend_orientation="h",
-    legend=dict(x=.27, y=-0.1),
+    legend=dict(x=.35, y=-0.1),
     plot_bgcolor='#ffffff',
     paper_bgcolor='#ffffff',
     font=dict(color='#292929', size=10)
@@ -85,7 +108,7 @@ app.layout = html.Div(
             children=[
                 html.H4(
                     id='header-title',
-                    children="June Expenses"),
+                    children=f"{month_list[month_index]} Expenses"),
                 # html.H3(
                 #     id="description",
                 #     children=dcc.Markdown(
@@ -115,7 +138,7 @@ app.layout = html.Div(
                         html.H3(
                             style={'color': '#292929'},
                             children=[
-                                '$1,200',
+                                f'${current_expenses:,}',
                                 html.P(
                                     style={'color': '#ffffff', },
                                     children='xxxx xx xxx xxxx xxx xxxxx'
@@ -136,7 +159,7 @@ app.layout = html.Div(
                         html.H3(
                             style={'color': '#2ecc77'},
                             children=[
-                                '+$300',
+                                f'+${current_savings}',
                                 html.P(
                                     # children='+ {:,d} in the past 24h ({:.1%})'.format(
                                     #     plusRemainNum, plusRemainNum3) if plusRemainNum > 0 else '{:,d} in the past 24h ({:.1%})'.format(plusRemainNum, plusRemainNum3)
@@ -157,12 +180,12 @@ app.layout = html.Div(
                         html.H3(
                             style={'color': 'rgb(125, 164, 255)'},
                             children=[
-                                '$10,500',
+                                f'${wedding_savings:,}',
                                 html.P(
-                                    children='+ $4,500 from target'
+                                    children=f'+ ${wedding_deficit:,} from target'
                                 ),
                                 html.P(
-                                    children='Months left: 5'
+                                    children=f'Months left: {wedding_left}'
                                 )
 
                             ]
@@ -170,6 +193,7 @@ app.layout = html.Div(
 
                     ]
                 ),
+
                 html.Div(
                     className='number-plate-single',
                     id='number-plate-recover',
@@ -182,12 +206,12 @@ app.layout = html.Div(
                         html.H3(
                             style={'color': '#f0953f'},
                             children=[
-                                '$23,000',
+                                f'${renovation_savings:,}',
                                 html.P(
-                                    children='+ $7,000 from target'
+                                    children=f'+ ${renovation_deficit:,} from target'
                                 ),
                                 html.P(
-                                    children='Months left: 16'
+                                    children=f'Months left: {renovation_left}'
                                 )
 
                             ]
@@ -250,7 +274,7 @@ app.layout = html.Div(
                         dcc.Dropdown(
                             id="dcc-dropdown",
                             placeholder="Select month",
-                            value='Oct',
+                            value='Jun',
                             options=[
                                 {'label': i, 'value': i}
                                 for i in df_expenses.Month.tolist()
@@ -290,7 +314,7 @@ app.layout = html.Div(
                                                    for i in range(0, 12)},
                                             min=0,
                                             max=11,
-                                            value=[6, 11])
+                                            value=[5, 11])
                         ], style={'width': '100%',
                                   'fontSize': '12px',
                                   'display': 'inline-block'
